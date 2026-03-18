@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIRE PLAY | PANEL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --fire: #ff4500; --bg: #050505; --card: #111; --blue: #0088ff; --green: #00ff88; }
+        body { font-family: 'Rajdhani', sans-serif; background: var(--bg); color: #fff; margin: 0; padding-bottom: 100px; }
+        .container { padding: 15px; max-width: 500px; margin: auto; }
+        .card { background: var(--card); border-radius: 15px; padding: 20px; border: 1px solid #222; margin-bottom: 15px; }
+        h2 { font-family: 'Orbitron'; color: var(--fire); font-size: 1rem; text-align: center; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 15px; }
+
+        .estoque-card { background: #111; border-radius: 12px; padding: 15px; margin-bottom: 20px; border: 1px solid #222; }
+        .progress-bar { background: #000; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 10px; border: 1px solid #333; }
+        .progress-fill { height: 100%; transition: 0.8s; }
+
+        input { width: 100%; padding: 14px; margin: 8px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; box-sizing: border-box; font-family: 'Rajdhani'; font-size: 1rem; }
+        .btn-fire { width: 100%; padding: 16px; border: none; border-radius: 10px; background: var(--fire); color: #fff; font-weight: bold; font-family: 'Orbitron'; cursor: pointer; box-shadow: 0 4px 0 #900; }
+
+        .shortcut-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; }
+        .btn-short { background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 8px; font-size: 11px; font-family: 'Orbitron'; cursor: pointer; }
+
+        .nav-bottom { position: fixed; bottom: 0; width: 100%; background: #000; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #222; z-index: 1000; }
+        .nav-item { color: #444; font-size: 9px; text-align: center; cursor: pointer; flex: 1; }
+        .nav-item i { font-size: 18px; margin-bottom: 4px; }
+        .nav-item.active { color: var(--fire); }
+
+        .tab { display: none; }
+        .active-tab { display: block; animation: fadeIn 0.4s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .val-orb { font-family: 'Orbitron'; }
+
+        /* Estilo para a Calculadora Dinâmica */
+        .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: center; margin-bottom: 10px; }
+        .calc-grid label { font-size: 10px; color: #666; font-family: 'Orbitron'; }
+        .plan-row { display: flex; justify-content: space-between; align-items: center; background: #000; padding: 12px; border-radius: 10px; margin-bottom: 8px; border: 1px solid #222; }
+        .plan-row b { font-size: 13px; }
+        .plan-row small { color: var(--green); display: block; font-size: 9px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="estoque-card">
+        <div style="display: flex; justify-content: space-between; font-size: 12px;">
+            <span style="color: #666; font-family: 'Orbitron';">ESTOQUE</span>
+            <b style="color: var(--fire); font-family: 'Orbitron';">{{estoque_atual}} / {{estoque_max}}</b>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width: {{pct}}%; background: var(--green);"></div></div>
+    </div>
+
+    <div id="vendas" class="tab">
+        <h2>PDV REVENDA</h2>
+        {% if orcamento %}
+        <div class="card" style="border: 2px solid var(--blue); background: #0a0f1a;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                <a href="https://api.whatsapp.com/send?text={{orcamento.msg}}" target="_blank" class="btn-fire" style="background:#25D366; font-size: 9px; text-decoration:none; text-align:center;">WHATSAPP</a>
+                <a href="whatsapp://send?text={{orcamento.msg}}" class="btn-fire" style="background:#075e54; font-size: 9px; text-decoration:none; text-align:center;">BUSINESS</a>
+            </div>
+            <form method="POST">
+                <input type="hidden" name="tipo_form" value="confirmar_venda">
+                <input type="hidden" name="c_nome" value="{{orcamento.nome}}">
+                <input type="hidden" name="c_qtd" value="{{orcamento.qtd}}">
+                <input type="hidden" name="c_total" value="{{orcamento.total}}">
+                <input type="hidden" name="c_lucro" value="{{orcamento.lucro}}">
+                <button type="submit" class="btn-fire" style="background:var(--green); color:#000;">CONFIRMAR PAGAMENTO</button>
+            </form>
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <form method="POST">
+                <input type="hidden" name="tipo_form" value="gerar_orcamento">
+                <input type="text" name="cliente_nome" placeholder="NOME DO CLIENTE" required>
+                <div class="shortcut-grid">
+                    <button type="button" class="btn-short" onclick="addQtd(10)">+10</button>
+                    <button type="button" class="btn-short" onclick="addQtd(50)">+50</button>
+                    <button type="button" class="btn-short" onclick="addQtd(100)">+100</button>
+                    <button type="button" class="btn-short" onclick="resQtd()" style="color:var(--fire)">C</button>
+                </div>
+                <input type="number" name="qtd" id="in-qtd" placeholder="QUANTIDADE" required oninput="calcPDV()">
+                <div style="display:flex; justify-content:space-between; background:#000; padding:15px; border-radius:10px; margin-bottom:15px; border:1px solid #222;">
+                    <div style="text-align:center;"><small style="color:#444;">TOTAL</small><br><b class="val-orb" id="pdv-total" style="color:var(--blue);">R$ 0,00</b></div>
+                    <div style="text-align:center;"><small style="color:#444;">LUCRO</small><br><b class="val-orb" id="pdv-lucro" style="color:var(--green);">R$ 0,00</b></div>
+                </div>
+                <button type="submit" class="btn-fire">GERAR ORÇAMENTO</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="calc_final" class="tab">
+        <h2>CLIENTE FINAL</h2>
+        <div class="card">
+            <label style="font-size:10px; color:var(--fire); font-family:'Orbitron';">PREÇO BASE (1 MÊS)</label>
+            <input type="number" id="base-price" placeholder="Ex: 35.00" oninput="calcMeses()">
+
+            <hr style="border:0; border-top:1px solid #222; margin:15px 0;">
+
+            <div class="calc-grid">
+                <div><label>DESC. 3 MESES (%)</label><input type="number" id="d3" value="0" oninput="calcMeses()"></div>
+                <div><label>DESC. 6 MESES (%)</label><input type="number" id="d6" value="10" oninput="calcMeses()"></div>
+            </div>
+            <div class="calc-grid">
+                <div><label>DESC. 12 MESES (%)</label><input type="number" id="d12" value="20" oninput="calcMeses()"></div>
+                <div style="text-align:center; color:var(--fire); font-size:10px; font-family:'Orbitron';">AJUSTE OS %</div>
+            </div>
+
+            <div style="margin-top:15px;">
+                <div class="plan-row">
+                    <span>3 MESES</span>
+                    <div style="text-align:right;"><b class="val-orb" id="v3">R$ 0,00</b><small id="l3">Lucro: R$ 0,00</small></div>
+                </div>
+                <div class="plan-row">
+                    <span>6 MESES</span>
+                    <div style="text-align:right;"><b class="val-orb" id="v6">R$ 0,00</b><small id="l6">Lucro: R$ 0,00</small></div>
+                </div>
+                <div class="plan-row">
+                    <span>12 MESES</span>
+                    <div style="text-align:right;"><b class="val-orb" id="v12">R$ 0,00</b><small id="l12">Lucro: R$ 0,00</small></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="lucro" class="tab">
+        <h2>EXTRATO</h2>
+        <div class="card" style="text-align:center;"><b class="val-orb" style="font-size:2rem; color:var(--green);">R$ {{lucro_total}}</b></div>
+        <div style="overflow-x:auto; background:#000; border-radius:10px; border:1px solid #222;">
+            <table style="width:100%; font-size:12px; border-collapse:collapse;">
+                <thead style="background:#111; color:var(--fire);"><tr><th style="padding:12px;">DATA</th><th>CLIENTE</th><th>QTD</th><th>LUCRO</th></tr></thead>
+                <tbody>
+                    {% for h in historico %}
+                    <tr style="border-bottom:1px solid #111;"><td style="padding:12px;">{{ h[0].strftime('%d/%m') }}</td><td>{{ h[1] }}</td><td class="val-orb">{{ h[2] }}</td><td style="color:var(--green);" class="val-orb">R$ {{ h[4] }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="config" class="tab">
+        <h2>AJUSTES</h2>
+        <div class="card">
+            <form method="POST">
+                <input type="hidden" name="tipo_form" value="save_config">
+                <label style="font-size:10px;">CHAVE PIX</label><input type="text" name="p_pix" value="{{pix_atual}}">
+                <label style="font-size:10px;">CUSTO UNIT</label><input type="number" step="0.0001" name="p_custo" value="{{custo_real}}">
+                <label style="font-size:10px;">ESTOQUE TOTAL</label><input type="number" name="p_estoque" value="{{estoque_max}}">
+                <button type="submit" class="btn-fire" style="padding:10px;">SALVAR GERAL</button>
+            </form>
+        </div>
+        <div class="card">
+            <h4 style="font-size:10px; color:var(--blue);">REGRAS REVENDA</h4>
+            <form method="POST" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px;">
+                <input type="hidden" name="tipo_form" value="add_rule">
+                <input type="number" name="min" placeholder="Min" required>
+                <input type="number" name="max" placeholder="Max" required>
+                <input type="number" step="0.01" name="val" placeholder="R$" required>
+                <button type="submit" class="btn-fire" style="grid-column: span 3; padding:10px; background:var(--blue);">+ REGRA</button>
+            </form>
+            {% for r in regras %}
+            <div style="display:flex; justify-content:space-between; background:#000; padding:10px; border-radius:8px; margin-top:5px; border:1px solid #222; font-size:12px;">
+                <span>{{r[1]}}-{{r[2]}} un » R$ {{r[3]}}</span>
+                <form method="POST" style="margin:0;"><input type="hidden" name="tipo_form" value="del_rule"><input type="hidden" name="rule_id" value="{{r[0]}}"><button type="submit" style="background:none; border:none; color:red;"><i class="fa-solid fa-trash"></i></button></form>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<nav class="nav-bottom">
+    <div onclick="mudar('vendas', this)" id="nav-vendas" class="nav-item"><i class="fa-solid fa-bolt"></i><br>PDV</div>
+    <div onclick="mudar('calc_final', this)" id="nav-calc_final" class="nav-item"><i class="fa-solid fa-calculator"></i><br>Final</div>
+    <div onclick="mudar('lucro', this)" id="nav-lucro" class="nav-item"><i class="fa-solid fa-table"></i><br>Extrato</div>
+    <div onclick="mudar('config', this)" id="nav-config" class="nav-item"><i class="fa-solid fa-gears"></i><br>Ajustes</div>
+</nav>
+
+<script>
+    const regras = [{% for r in regras %}{min:{{r[1]}}, max:{{r[2]}}, val:{{r[3]}}},{% endfor %}];
+    const meuCusto = parseFloat("{{custo_real}}");
+    const inQ = document.getElementById('in-qtd');
+
+    function calcPDV() {
+        const q = parseInt(inQ.value) || 0;
+        let vU = 0;
+        for(let r of regras) { if(q >= r.min && q <= r.max) { vU = r.val; break; } }
+        const total = q * vU;
+        const lucro = total - (meuCusto * q);
+        document.getElementById('pdv-total').innerText = 'R$ ' + total.toFixed(2);
+        document.getElementById('pdv-lucro').innerText = 'R$ ' + lucro.toFixed(2);
+    }
+
+    // NOVA FUNÇÃO CALCULADORA FINAL DINÂMICA
+    function calcMeses() {
+        const p1 = parseFloat(document.getElementById('base-price').value) || 0;
+        const desc3 = parseFloat(document.getElementById('d3').value) || 0;
+        const desc6 = parseFloat(document.getElementById('d6').value) || 0;
+        const desc12 = parseFloat(document.getElementById('d12').value) || 0;
+
+        // Função interna para calcular valor e lucro
+        const calcularPlano = (meses, desc) => {
+            const valorSemDesc = p1 * meses;
+            const valorFinal = valorSemDesc * (1 - (desc / 100));
+            const lucroFinal = valorFinal - (meuCusto * meses);
+            return { preco: valorFinal, lucro: lucroFinal };
+        };
+
+        const res3 = calcularPlano(3, desc3);
+        const res6 = calcularPlano(6, desc6);
+        const res12 = calcularPlano(12, desc12);
+
+        document.getElementById('v3').innerText = 'R$ ' + res3.preco.toFixed(2);
+        document.getElementById('l3').innerText = 'Lucro: R$ ' + res3.lucro.toFixed(2);
+
+        document.getElementById('v6').innerText = 'R$ ' + res6.preco.toFixed(2);
+        document.getElementById('l6').innerText = 'Lucro: R$ ' + res6.lucro.toFixed(2);
+
+        document.getElementById('v12').innerText = 'R$ ' + res12.preco.toFixed(2);
+        document.getElementById('l12').innerText = 'Lucro: R$ ' + res12.lucro.toFixed(2);
+    }
+
+    function addQtd(n) { inQ.value = (parseInt(inQ.value) || 0) + n; calcPDV(); }
+    function resQtd() { inQ.value = ''; calcPDV(); }
+
+    function mudar(id, el) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active-tab'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById(id).classList.add('active-tab');
+        const activeNav = el || document.getElementById('nav-' + id);
+        if(activeNav) activeNav.classList.add('active');
+        localStorage.setItem('aba_fireplay', id);
+    }
+
+    window.onload = function() {
+        const abaSalva = localStorage.getItem('aba_fireplay') || 'vendas';
+        mudar(abaSalva, null);
+        calcPDV();
+    };
+</script>
+</body>
+</html>
