@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FirePlay - Login</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden; /* Impede barras de rolagem */
+        }
+
+        /* --- O FUNDO (BACKGROUND COM BLUR) --- */
+        .background-image {
+            /* Usando a URL da sua imagem original */
+            background-image: url('https://i.ibb.co/hFGFWHy3/FIREPLAT.png');
+
+            /* Cobre a tela toda */
+            height: 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+
+            /* Aplica o desfoque (Blur) e escala um pouco para não ver a borda */
+            filter: blur(15px);
+            transform: scale(1.1);
+
+            /* Posicionamento absoluto atrás de tudo */
+            position: fixed;
+            width: 100%;
+            z-index: -2;
+        }
+
+        /* --- CAMADA ESCURA SOBRE O FUNDO (OVERLAY) --- */
+        .background-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.75); /* Escurece 75% */
+            z-index: -1;
+        }
+
+        /* --- CONTEÚDO PRINCIPAL (CENTRADO) --- */
+        .main-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-container {
+            background-color: #1a1a1a;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+            text-align: center;
+            width: 100%;
+            max-width: 350px;
+            border: 1px solid #333;
+        }
+
+        /* A logo principal dentro da caixa (nítida) */
+        .logo-main {
+            width: 150px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-bottom: 25px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            color: #ff4b2b;
+            text-transform: uppercase;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #333;
+            background-color: #252525;
+            color: white;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 5px;
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+
+        .footer-links {
+            margin-top: 25px;
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .footer-links a {
+            color: #ff4b2b;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="background-image"></div>
+    <div class="background-overlay"></div>
+
+    <div class="main-content">
+        <div class="login-container">
+            <img src="https://i.ibb.co/hFGFWHy3/FIREPLAT.png" alt="FirePlay" class="logo-main">
+
+            <h2>Login</h2>
+
+            <form action="/" method="POST">
+                <input type="text" name="username" placeholder="Usuário" required>
+                <input type="password" name="password" placeholder="Senha" required>
+                <button type="submit">Acessar Painel</button>
+            </form>
+
+            <div class="footer-links">
+                <p>Esqueceu a senha? <a href="#">Clique aqui</a></p>
+                <p>Novo por aqui? <a href="/register">Cadastre-se</a></p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
